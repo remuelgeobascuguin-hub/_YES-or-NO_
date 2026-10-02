@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lablab Nimo si Paula?</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: linear-gradient(
+                135deg,
+                #e5f4ff,
+                #cce9ff
+            );
+
+            font-family: 'Fredoka', sans-serif;
+
+            transition: background 0.8s ease;
+        }
+
+        .container {
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: clamp(38px, 8vw, 75px);
+            color: #4aa8ff;
+
+            margin: 0 0 35px;
+
+            text-shadow: 3px 3px 0 white;
+
+            animation: float 2.5s ease-in-out infinite;
+
+            transition: color 0.8s ease;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button {
+            border: none;
+            padding: 16px 35px;
+
+            border-radius: 50px;
+
+            font-family: 'Fredoka', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.3s ease,
+                background 0.8s ease,
+                color 0.8s ease,
+                box-shadow 0.8s ease;
+        }
+
+        /* BLUE THEME */
+
+        #yes {
+            background: #69bfff;
+            color: white;
+            box-shadow: 0 8px 0 #3c9de8;
+        }
+
+        #no {
+            background: white;
+            color: #4aa8ff;
+            box-shadow: 0 8px 0 #a8d9ff;
+        }
+
+        button:hover {
+            transform: translateY(-4px) scale(1.05);
+        }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        /* PINK THEME */
+
+        body.pink-theme {
+            background: linear-gradient(
+                135deg,
+                #fff0f7,
+                #e9f5ff
+            );
+        }
+
+        body.pink-theme h1 {
+            color: #ff70a6;
+        }
+
+        body.pink-theme #yes {
+            background: #ff8fbd;
+            box-shadow: 0 8px 0 #e86699;
+        }
+
+        body.pink-theme #no {
+            color: #ff70a6;
+            box-shadow: 0 8px 0 #ffc2d9;
+        }
+
+        /* VERY YES */
+
+        .very-yes {
+            background: #ff4f81 !important;
+            color: white !important;
+            box-shadow: 0 10px 0 #d93668 !important;
+
+            transition: transform 0.3s ease;
+        }
+
+        /* RESTART */
+
+        #restart {
+            margin-top: 35px;
+            padding: 10px 24px;
+
+            font-size: 16px;
+
+            background: white;
+            color: #4aa8ff;
+
+            border: 2px solid #a8d9ff;
+            box-shadow: none;
+
+            opacity: 0.85;
+        }
+
+        #restart:hover {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+
+        /* PARTICLES */
+
+        .particle {
+            position: fixed;
+            pointer-events: none;
+
+            font-size: 25px;
+            z-index: 10;
+
+            animation: explode 1s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform:
+                    translate(0, 0)
+                    scale(0.3)
+                    rotate(0deg);
+
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    translate(var(--x), var(--y))
+                    scale(1.4)
+                    rotate(var(--rotation));
+
+                opacity: 0;
+            }
+        }
+
+        /* FLOATING TITLE */
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* RED PULSE */
+
+        .red-pulse {
+            animation: redPulse 0.7s ease;
+        }
+
+        @keyframes redPulse {
+            0% {
+                background: #e5f4ff;
+            }
+
+            30% {
+                background: #ff6b6b;
+            }
+
+            60% {
+                background: #ffb3b3;
+            }
+
+            100% {
+                background: linear-gradient(
+                    135deg,
+                    #fff0f7,
+                    #e9f5ff
+                );
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Lablab Nimo si Paula?</h1>
+
+        <div class="buttons">
+
+            <button id="yes">
+                Yes
+            </button>
+
+            <button id="no">
+                No
+            </button>
+
+        </div>
+
+        <button id="restart">
+            ↻ Restart
+        </button>
+
+    </div>
+
+    <script>
+
+        const yesButton =
+            document.getElementById("yes");
+
+        const noButton =
+            document.getElementById("no");
+
+        const restartButton =
+            document.getElementById("restart");
+
+
+        let veryYesScale = 1.3;
+
+
+        /* =========================
+           SOUND SYSTEM
+        ========================= */
+
+        let audioContext;
+
+
+        function startAudio() {
+
+            if (!audioContext) {
+
+                audioContext = new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+            }
+
+            if (audioContext.state === "suspended") {
+                audioContext.resume();
+            }
+
+        }
+
+
+        /* =========================
+           CUTE YES SOUND
+        ========================= */
+
+        function playYesSound() {
+
+            startAudio();
+
+            const now =
+                audioContext.currentTime;
+
+            const oscillator =
+                audioContext.createOscillator();
+
+            const gain =
+                audioContext.createGain();
+
+
+            oscillator.type = "sine";
+
+
+            /* Soft cute "ting~" */
+
+            oscillator.frequency.setValueAtTime(
+                880,
+                now
+            );
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                1320,
+                now + 0.12
+            );
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                1100,
+                now + 0.25
+            );
+
+
+            gain.gain.setValueAtTime(
+                0,
+                now
+            );
+
+            gain.gain.linearRampToValueAtTime(
+                0.12,
+                now + 0.02
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + 0.3
+            );
+
+
+            oscillator.connect(gain);
+
+            gain.connect(
+                audioContext.destination
+            );
+
+
+            oscillator.start(now);
+
+            oscillator.stop(
+                now + 0.32
+            );
+
+        }
+
+
+        /* =========================
+           NO SOUND
+        ========================= */
+
+        function playNoSound() {
+
+            startAudio();
+
+            const oscillator =
+                audioContext.createOscillator();
+
+            const gain =
+                audioContext.createGain();
+
+
+            oscillator.type =
+                "sawtooth";
+
+
+            oscillator.frequency.setValueAtTime(
+                220,
+                audioContext.currentTime
+            );
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                90,
+                audioContext.currentTime + 0.35
+            );
+
+
+            gain.gain.setValueAtTime(
+                0.2,
+                audioContext.currentTime
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                audioContext.currentTime + 0.35
+            );
+
+
+            oscillator.connect(gain);
+
+            gain.connect(
+                audioContext.destination
+            );
+
+
+            oscillator.start();
+
+            oscillator.stop(
+                audioContext.currentTime + 0.35
+            );
+
+        }
+
+
+        /* =========================
+           VERY YES SOUND
+        ========================= */
+
+        function playVeryYesSound() {
+
+            startAudio();
+
+            const now =
+                audioContext.currentTime;
+
+
+            const notes = [
+                523.25,
+                659.25,
+                783.99,
+                1046.50,
+                1318.51
+            ];
+
+
+            notes.forEach(
+                function(frequency, index) {
+
+                    const oscillator =
+                        audioContext.createOscillator();
+
+                    const gain =
+                        audioContext.createGain();
+
+
+                    oscillator.type =
+                        "triangle";
+
+                    oscillator.frequency.value =
+                        frequency;
+
+
+                    const startTime =
+                        now + index * 0.06;
+
+
+                    gain.gain.setValueAtTime(
+                        0,
+                        startTime
+                    );
+
+                    gain.gain.linearRampToValueAtTime(
+                        0.22,
+                        startTime + 0.03
+                    );
+
+                    gain.gain.exponentialRampToValueAtTime(
+                        0.001,
+                        startTime + 0.5
+                    );
+
+
+                    oscillator.connect(gain);
+
+                    gain.connect(
+                        audioContext.destination
+                    );
+
+
+                    oscillator.start(
+                        startTime
+                    );
+
+                    oscillator.stop(
+                        startTime + 0.55
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =========================
+           RESTART SOUND
+        ========================= */
+
+        function playRestartSound() {
+
+            startAudio();
+
+            const oscillator =
+                audioContext.createOscillator();
+
+            const gain =
+                audioContext.createGain();
+
+
+            oscillator.type = "sine";
+
+
+            oscillator.frequency.setValueAtTime(
+                500,
+                audioContext.currentTime
+            );
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                800,
+                audioContext.currentTime + 0.2
+            );
+
+
+            gain.gain.setValueAtTime(
+                0.15,
+                audioContext.currentTime
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                audioContext.currentTime + 0.3
+            );
+
+
+            oscillator.connect(gain);
+
+            gain.connect(
+                audioContext.destination
+            );
+
+
+            oscillator.start();
+
+            oscillator.stop(
+                audioContext.currentTime + 0.3
+            );
+
+        }
+
+
+        /* =========================
+           YES BUTTON
+        ========================= */
+
+        yesButton.addEventListener(
+            "click",
+            function(event) {
+
+                playYesSound();
+
+
+                createExplosion(
+                    event.clientX,
+                    event.clientY,
+
+                    [
+                        "⭐",
+                        "✨",
+                        "🌟",
+                        "💫"
+                    ]
+                );
+
+            }
+        );
+
+
+        /* =========================
+           NO / VERY YES
+        ========================= */
+
+        noButton.addEventListener(
+            "click",
+            function(event) {
+
+                /* FIRST NO CLICK */
+
+                if (
+                    !noButton.classList.contains(
+                        "very-yes"
+                    )
+                ) {
+
+                    playNoSound();
+
+
+                    /* Turn pink */
+
+                    document.body.classList.add(
+                        "pink-theme"
+                    );
+
+
+                    /* Red pulse */
+
+                    document.body.classList.remove(
+                        "red-pulse"
+                    );
+
+                    void document.body.offsetWidth;
+
+                    document.body.classList.add(
+                        "red-pulse"
+                    );
+
+
+                    /* Change button */
+
+                    noButton.textContent =
+                        "VERY YES!";
+
+                    noButton.classList.add(
+                        "very-yes"
+                    );
+
+
+                    return;
+
+                }
+
+
+                /* EVERY VERY YES CLICK */
+
+                playVeryYesSound();
+
+
+                veryYesScale += 0.25;
+
+
+                noButton.style.transform =
+                    `scale(${veryYesScale})`;
+
+
+                createExplosion(
+                    event.clientX,
+                    event.clientY,
+
+                    [
+                        "⭐",
+                        "✨",
+                        "🌟",
+                        "💫",
+                        "💖",
+                        "💕",
+                        "❤️"
+                    ]
+                );
+
+            }
+        );
+
+
+        /* =========================
+           RESTART
+        ========================= */
+
+        restartButton.addEventListener(
+            "click",
+            function() {
+
+                playRestartSound();
+
+
+                /* Return to blue */
+
+                document.body.classList.remove(
+                    "pink-theme"
+                );
+
+                document.body.classList.remove(
+                    "red-pulse"
+                );
+
+
+                /* Reset button */
+
+                noButton.textContent =
+                    "No";
+
+                noButton.classList.remove(
+                    "very-yes"
+                );
+
+
+                /* Reset size */
+
+                veryYesScale = 1.3;
+
+                noButton.style.transform =
+                    "";
+
+
+                /* Remove particles */
+
+                document
+                    .querySelectorAll(
+                        ".particle"
+                    )
+                    .forEach(
+                        function(particle) {
+
+                            particle.remove();
+
+                        }
+                    );
+
+            }
+        );
+
+
+        /* =========================
+           EXPLOSION
+        ========================= */
+
+        function createExplosion(
+            x,
+            y,
+            symbols
+        ) {
+
+            const amount = 18;
+
+
+            for (
+                let i = 0;
+                i < amount;
+                i++
+            ) {
+
+                const particle =
+                    document.createElement("div");
+
+
+                particle.classList.add(
+                    "particle"
+                );
+
+
+                particle.textContent =
+                    symbols[
+                        Math.floor(
+                            Math.random()
+                            * symbols.length
+                        )
+                    ];
+
+
+                particle.style.left =
+                    x + "px";
+
+                particle.style.top =
+                    y + "px";
+
+
+                const angle =
+                    Math.random()
+                    * Math.PI
+                    * 2;
+
+
+                const distance =
+                    80 +
+                    Math.random()
+                    * 180;
+
+
+                const moveX =
+                    Math.cos(angle)
+                    * distance;
+
+
+                const moveY =
+                    Math.sin(angle)
+                    * distance;
+
+
+                particle.style.setProperty(
+                    "--x",
+                    moveX + "px"
+                );
+
+
+                particle.style.setProperty(
+                    "--y",
+                    moveY + "px"
+                );
+
+
+                particle.style.setProperty(
+                    "--rotation",
+                    (
+                        Math.random()
+                        * 720
+                        - 360
+                    ) + "deg"
+                );
+
+
+                particle.style.fontSize =
+                    (
+                        18 +
+                        Math.random()
+                        * 25
+                    ) + "px";
+
+
+                document.body.appendChild(
+                    particle
+                );
+
+
+                setTimeout(
+                    function() {
+
+                        particle.remove();
+
+                    },
+                    1000
+                );
+
+            }
+
+        }
+
+    </script>
+
+</body>
+</html>
